@@ -8,6 +8,8 @@ let bulkButton
 let idInputRedeem
 let amountInputRedeem
 let redeemButton
+let cancelButton
+let idInputCancel
 let notification
 let notificationText
 let notificationButton
@@ -23,6 +25,8 @@ function setDomElements() {
     idInputRedeem = document.getElementById("id-input-redeem")
     amountInputRedeem = document.getElementById("amount-input-redeem")
     redeemButton = document.getElementById("redeem-button")
+    cancelButton = document.getElementById("cancel-button")
+    idInputCancel = document.getElementById("id-input-cancel")
     notification = document.getElementById("notification")
     notificationText = document.getElementById("notification-text")
     notificationButton = document.getElementById("notification-button")
@@ -52,16 +56,26 @@ function maybeSwitchRedeemState() {
     }
 }
 
+function maybeSwitchCancelState() {
+    if (cancelButton.disabled && !actionInProgress && idInputCancel.value !== "") {
+        cancelButton.disabled = false
+    } else if (idInputCancel.value === "") {
+        cancelButton.disabled = true
+    }
+}
+
 function maybeSwitchAll(){
     maybeSwitchIssueState()
     maybeSwitchBulkState()
     maybeSwitchRedeemState()
+    maybeSwitchCancelState()
 }
 
 function disableAllButtons() {
     issueButton.disabled = true
     bulkButton.disabled = true
     redeemButton.disabled = true
+    cancelButton.disabled = true
 }
 
 function hideNotification() {
@@ -164,6 +178,19 @@ async function redeemCard() {
     })
 }
 
+async function cancelCard() {
+    actionInProgress = true
+    disableAllButtons()
+    const id = idInputCancel.value
+    idInputCancel.value = ""
+    const response = await fetch("/giftcard/cancel/id/" + id, {
+        method: "POST"
+    })
+    response.json().then(result => {
+        handleResult(result)
+    })
+}
+
 async function updateCount() {
     const count = document.getElementById("count")
     const lastEvent = document.getElementById("last-event")
@@ -222,6 +249,9 @@ function setListeners() {
     redeemButton.addEventListener("click", () => {
         void redeemCard();
     });
+    cancelButton.addEventListener("click", () => {
+        void cancelCard()
+    })
     idInputIssue.addEventListener("keyup", () => {
         maybeSwitchIssueState()
     })
@@ -239,6 +269,9 @@ function setListeners() {
     })
     amountInputRedeem.addEventListener("keyup", () => {
         maybeSwitchRedeemState()
+    })
+    idInputCancel.addEventListener("keyup", () => {
+        maybeSwitchCancelState()
     })
     addEventListener("paste", () => {
         setTimeout(maybeSwitchAll, 10)

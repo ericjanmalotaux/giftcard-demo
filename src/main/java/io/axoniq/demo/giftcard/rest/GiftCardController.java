@@ -1,11 +1,6 @@
 package io.axoniq.demo.giftcard.rest;
 
-import io.axoniq.demo.giftcard.api.IssueCardCommand;
-import io.axoniq.demo.giftcard.api.RedeemCardCommand;
-import io.axoniq.demo.giftcard.api.CardSummary;
-import io.axoniq.demo.giftcard.api.CountCardSummariesQuery;
-import io.axoniq.demo.giftcard.api.CountCardSummariesResponse;
-import io.axoniq.demo.giftcard.api.FetchCardSummariesQuery;
+import io.axoniq.demo.giftcard.api.*;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.axonframework.messaging.responsetypes.ResponseTypes;
 import org.axonframework.queryhandling.QueryGateway;
@@ -71,6 +66,17 @@ public class GiftCardController {
                    .then(Mono.just(Result.ok()))
                    .onErrorResume(e -> Mono.just(Result.Error(id, e.getMessage())))
                    .timeout(Duration.ofSeconds(5L));
+    }
+
+    @PostMapping("cancel/id/{id}")
+    public Mono<Result> cancel(
+            @PathVariable String id
+    ) {
+        var command = new CancelCardCommand(id);
+        return Mono.fromFuture(commandGateway.send(command))
+                .then(Mono.just(Result.ok()))
+                .onErrorResume(e -> Mono.just(Result.Error(id, e.getMessage())))
+                .timeout(Duration.ofSeconds(5l));
     }
 
     @GetMapping(path = "bulkissue/number/{number}/amount/{amount}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)

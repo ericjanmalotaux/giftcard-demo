@@ -1,9 +1,6 @@
 package io.axoniq.demo.giftcard.command;
 
-import io.axoniq.demo.giftcard.api.CardIssuedEvent;
-import io.axoniq.demo.giftcard.api.CardRedeemedEvent;
-import io.axoniq.demo.giftcard.api.IssueCardCommand;
-import io.axoniq.demo.giftcard.api.RedeemCardCommand;
+import io.axoniq.demo.giftcard.api.*;
 import org.axonframework.test.aggregate.AggregateTestFixture;
 import org.axonframework.test.aggregate.FixtureConfiguration;
 import org.junit.jupiter.api.Test;
@@ -53,5 +50,12 @@ class GiftCardTest {
         testFixture.given(new CardIssuedEvent(CARD_ID, AMOUNT), new CardRedeemedEvent(CARD_ID, AMOUNT))
                    .when(new RedeemCardCommand(CARD_ID, AMOUNT))
                    .expectException(IllegalStateException.class);
+    }
+
+    @Test
+    void testCancelCardCommandPublishesCardCancelledEvent() {
+        testFixture.given(new CardIssuedEvent(CARD_ID, AMOUNT))
+                .when(new CancelCardCommand(CARD_ID))
+                .expectEvents(new CardCanceledEvent(CARD_ID));
     }
 }
