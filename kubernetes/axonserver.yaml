@@ -33,6 +33,9 @@ spec:
             initialDelaySeconds: 5
             periodSeconds: 5
             timeoutSeconds: 1
+          env:
+            - name: AXONSERVER_HOSTNAME
+              value: axonserver
 ---
 apiVersion: v1
 kind: Service
